@@ -31,8 +31,11 @@ class NewsService extends Service {
             ctx
         } = this;
         try {
-            item.id = uuid();
-            let result = await ctx.app.mysql.insert('tb_users', item);
+            item.id = uuid(); {
+                item.createtime = new Date().getTime();
+                item.updatetime = new Date().getTime();
+            }
+            let result = await ctx.app.mysql.insert('tb_news', item);
             ctx.status = 200;
             if (result != null) {
                 return SUCCESS(result);
@@ -66,7 +69,8 @@ class NewsService extends Service {
             let result = await this.find(id);
             if (result.code == 0) {
                 body.id = id;
-                let result = await ctx.app.mysql.update('tb_users', body);
+                body.updatetime = new Date().getTime();
+                let result = await ctx.app.mysql.update('tb_news', body);
                 ctx.status = 200;
                 if (result != null) {
                     return SUCCESS(result);
@@ -96,7 +100,7 @@ class NewsService extends Service {
         try {
             let result = await this.find(id);
             if (result.code == 0) {
-                let result = await ctx.app.mysql.delete('tb_users', {
+                let result = await ctx.app.mysql.delete('tb_news', {
                     id: id
                 });
                 ctx.status = 200;
@@ -126,7 +130,7 @@ class NewsService extends Service {
             ctx
         } = this;
         try {
-            let result = await ctx.app.mysql.get('tb_users', {
+            let result = await ctx.app.mysql.get('tb_news', {
                 id: id
             });
             ctx.status = 200;
@@ -161,13 +165,13 @@ class NewsService extends Service {
         } = this;
         try {
             let start = (limit - 1) * offset;
-            let sql = `select count(1) as total from tb_users`;
+            let sql = `select count(1) as total from tb_news`;
             let total = 0;
             let result = await ctx.app.mysql.query(sql);
             if (result != null) {
                 total = result[0].total;
             }
-            sql = `select * from tb_users limit ${start},${offset}`;
+            sql = `select * from tb_news limit ${start},${offset}`;
             result = await ctx.app.mysql.query(sql);
             ctx.status = 200;
             if (result != null) {

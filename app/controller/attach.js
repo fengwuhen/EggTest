@@ -2,11 +2,11 @@
 
 const Controller = require('egg').Controller;
 
-class DictionaryController extends Controller {
+class AttachController extends Controller {
 /**
      * 新增数据
      *
-     * @memberof DictionaryController
+     * @memberof AttachController
      */
     async create() {
         const {
@@ -14,13 +14,13 @@ class DictionaryController extends Controller {
         } = this;
         const body = ctx.request.body;
         const file = ctx.request.files;
-        ctx.body = await ctx.service.dictionary.create(body);
+        ctx.body = await ctx.service.attach.create(body);
     }
 
     /**
      * 修改数据
      *
-     * @memberof DictionaryController
+     * @memberof AttachController
      */
     async update() {
         const {
@@ -28,7 +28,7 @@ class DictionaryController extends Controller {
         } = this;
         const id = ctx.params.id;
         const body = ctx.request.body;
-        ctx.body = await ctx.service.dictionary.update({
+        ctx.body = await ctx.service.attach.update({
             id,
             body
         });
@@ -37,20 +37,20 @@ class DictionaryController extends Controller {
     /**
      * 删除数据
      *
-     * @memberof DictionaryController
+     * @memberof AttachController
      */
     async destroy() {
         const {
             ctx
         } = this;
         const id = ctx.params.id;
-        ctx.body = await ctx.service.dictionary.destroy(id);
+        ctx.body = await ctx.service.attach.destroy(id);
     }
 
     /**
      * 查询数据
      *
-     * @memberof DictionaryController
+     * @memberof AttachController
      */
     async find() {
         const {
@@ -58,13 +58,13 @@ class DictionaryController extends Controller {
         } = this;
         console.log(ctx.params);
         const id = ctx.params.id;
-        ctx.body = await ctx.service.dictionary.find(id);
+        ctx.body = await ctx.service.attach.find(id);
     }
 
     /**
      * 获取数据列表
      *
-     * @memberof DictionaryController
+     * @memberof AttachController
      */
     async list() {
         const {
@@ -73,11 +73,11 @@ class DictionaryController extends Controller {
         console.log(ctx.params);
         const offset = ctx.params.offset;
         const limit = ctx.params.limit;
-        ctx.body = await ctx.service.dictionary.list({
+        ctx.body = await ctx.service.attach.list({
             offset,
             limit
         });
     }
 }
 
-module.exports = DictionaryController;
+module.exports = AttachController;
