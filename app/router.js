@@ -24,4 +24,5 @@ module.exports = app => {
   router.get("/user/find/:id", controller.user.find);
   router.get("/user/findAccount/:account",controller.user.findByAccount);
   router.get("/user/destroy/:id",controller.user.destroy);
+  router.get("/user/list/:offset/:limit", controller.user.list);
 };

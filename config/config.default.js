@@ -1,6 +1,6 @@
 /* eslint valid-jsdoc: "off" */
 
-'use strict';
+"use strict";
 
 /**
  * @param {Egg.EggAppInfo} appInfo app info
@@ -10,10 +10,10 @@ module.exports = appInfo => {
    * built-in config
    * @type {Egg.EggAppConfig}
    **/
-  const config = exports = {};
+  const config = (exports = {});
 
   // use for cookie sign key, should change to your own and keep security
-  config.keys = appInfo.name + '_1576487623073_7888';
+  config.keys = appInfo.name + "_1576487623073_7888";
 
   // add your middleware config here
   config.middleware = [];
@@ -27,40 +27,41 @@ module.exports = appInfo => {
     // database configuration
     client: {
       // host
-      host: 'localhost',
+      host: "localhost",
       // port
-      port: '3306',
+      port: "3306",
       // username
-      user: 'root',
+      user: "root",
       // password
-      password: '123456789',
+      password: "123456789",
       // database
-      database: 'touchinfo',
+      database: "touchinfo"
     },
     // load into app, default is open
     app: true,
     // load into agent, default is close
-    agent: false,
+    agent: false
   };
 
   config.security = {
     csrf: {
       enable: false
     },
-    domainWhiteList: ['*']
+    domainWhiteList: ["*"]
   };
 
   config.cors = {
-    origin: '*',
-    allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS'
-  }
+    origin: "*",
+    allowMethods: "GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS"
+  };
 
   config.multipart = {
-    mode: 'file'
-  }
+    mode: "file",
+    fields: 100
+  };
 
   return {
     ...config,
-    ...userConfig,
+    ...userConfig
   };
 };

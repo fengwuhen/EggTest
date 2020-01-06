@@ -10,6 +10,9 @@ const {
   LIST_ODD
 } = require("../util/result");
 const uuid = require("uuid/v4");
+const fs = require('mz/fs');
+const path = require('path');
+const pump = require('mz-modules/pump');
 
 class AttachService extends Service {
   /**
@@ -19,57 +22,32 @@ class AttachService extends Service {
    * @returns
    * @memberof NewsService
    */
-  async create(item) {
+  async create(linkId, file) {
     const { ctx } = this;
     try {
+      let item = {};
       item.id = uuid();
-      {
-        item.createtime = new Date().getTime();
-        item.updatetime = new Date().getTime();
-      }
-      let result = await ctx.app.mysql.insert("tb_news", item);
+      item.linkId = linkId;
+      item.name = file.filename;
+      item.size = 0;
+      item.createtime = new Date().getTime();
+
+      const filename = file.filename.toLowerCase();
+      const targetPath = path.join(this.config.baseDir, 'app/public', filename);
+      const source = fs.createReadStream(file.filepath);
+      const target = fs.createWriteStream(targetPath);
+      await pump(source, target);
+
+      let result = await ctx.app.mysql.insert("tb_attach", item);
       ctx.status = 200;
       if (result != null) {
-        return SUCCESS(result);
+        return SUCCESS("新增成功！", result);
       } else {
-        return ERROR(result);
+        return ERROR("新增失败！", {});
       }
     } catch (error) {
       ctx.status = 500;
       return ODD(error.sqlMessage);
-    }
-  }
-
-  /**
-   * update
-   *
-   * @param {*} {
-   *         id,
-   *         item
-   *     }
-   * @returns
-   * @memberof NewsService
-   */
-  async update({ id, body }) {
-    const { ctx } = this;
-    try {
-      let result = await this.find(id);
-      if (result.code == 0) {
-        body.id = id;
-        body.updatetime = new Date().getTime();
-        let result = await ctx.app.mysql.update("tb_news", body);
-        ctx.status = 200;
-        if (result != null) {
-          return SUCCESS(result);
-        } else {
-          return ERROR(result);
-        }
-      } else {
-        return ERROR("数据不存在！");
-      }
-    } catch (error) {
-      ctx.status = 500;
-      return ODD(error);
     }
   }
 
@@ -138,7 +116,7 @@ class AttachService extends Service {
    * @returns
    * @memberof NewsService
    */
-  async list({ offset, limit }) {
+  async list() {
     const { ctx } = this;
     try {
       let start = (limit - 1) * offset;

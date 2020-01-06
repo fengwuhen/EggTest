@@ -69,7 +69,7 @@ class UserController extends Controller {
    *
    * @memberof UserController
    */
-  async findByAccount(){
+  async findByAccount() {
     const { ctx } = this;
     const account = ctx.params.account;
     console.log(account);
@@ -83,12 +83,13 @@ class UserController extends Controller {
    */
   async list() {
     const { ctx } = this;
-    console.log(ctx.params);
     const offset = ctx.params.offset;
     const limit = ctx.params.limit;
+    const name = ctx.query.name;
     ctx.body = await ctx.service.user.list({
       offset,
-      limit
+      limit,
+      name
     });
   }
 }

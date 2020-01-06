@@ -186,7 +186,6 @@ class UserService extends Service {
       let result = await ctx.app.mysql.select("tb_users", {
         where: { account: account }
       });
-      console.log(result);
       ctx.status = 200;
       if (result != null && result.length > 0) {
         return SUCCESS("查询成功！", result);
@@ -200,37 +199,46 @@ class UserService extends Service {
   }
 
   /**
-   * list
+   * 列表
    *
-   * @param {*} {
-   *         offset,
-   *         limit
-   *     }
+   * @param {*} { offset, limit, name }
    * @returns
    * @memberof UserService
    */
-  async list({ offset, limit }) {
+  async list({ offset, limit, name }) {
     const { ctx } = this;
     try {
-      let start = (limit - 1) * offset;
-      let sql = `select count(1) as total from tb_users`;
+      let start = limit * offset;
+      let end = (limit + 1) * offset;
+
+      let sql = `select count(1) as total from tb_users `;
+      if (name != null && name != "") {
+        sql += ` where username like '%${name}%' `;
+      }
       let total = 0;
       let result = await ctx.app.mysql.query(sql);
       if (result != null) {
         total = result[0].total;
       }
-      sql = `select * from tb_users limit ${start},${offset}`;
-      result = await ctx.app.mysql.query(sql);
+      sql = `select * from tb_users `;
+      if (name != null && name != "") {
+        sql += ` where username like '%${name}%' `;
+      }
+      sql += ` limit ${start},${end} `;
+      let list = await ctx.app.mysql.query(sql);
+
       ctx.status = 200;
-      if (result != null) {
-        return LIST_SUCCESS({
-          offset,
-          limit,
+      if (list != null) {
+        return LIST_SUCCESS("查询成功！", {
+          offset: Number(offset),
+          limit: Number(limit),
           total,
-          result
+          size: list.length,
+          over: limit * offset + list.length == total,
+          list
         });
       } else {
-        return LIST_ERROR(result);
+        return LIST_ERROR("查询失败！", {});
       }
     } catch (error) {
       ctx.status = 500;
