@@ -25,20 +25,26 @@ class AttachService extends Service {
   async create(linkId, file) {
     const { ctx } = this;
     try {
-      let item = {};
-      item.id = uuid();
-      item.linkId = linkId;
-      item.name = file.filename;
-      item.size = 0;
-      item.createtime = new Date().getTime();
-
-      const filename = file.filename.toLowerCase();
-      const targetPath = path.join(this.config.baseDir, 'app/public', filename);
-      const source = fs.createReadStream(file.filepath);
-      const target = fs.createWriteStream(targetPath);
-      await pump(source, target);
-
-      let result = await ctx.app.mysql.insert("tb_attach", item);
+      // for (const file of files) {
+      //   let model = {};
+      //   let filename = file.filename;
+      //   let fileId = uuid();
+      //   model.id = fileId;
+      //   model.linkId = id;
+      //   model.name = filename;
+      //   model.createtime = new Date();
+      //   let index1 = filename.lastIndexOf(".");
+      //   let index2 = filename.length;
+      //   let suffix = filename.substring(index1, index2);
+      //   model.suffix = suffix;
+      //   let filePath = "/public/images/" + fileId + suffix;
+      //   const targetPath = path.join(this.config.baseDir, "app", filePath);
+      //   const source = fs.createReadStream(file.filepath);
+      //   const target = fs.createWriteStream(targetPath);
+      //   await pump(source, target);
+      //   model.path = filePath;
+      //   await ctx.app.mysql.insert("tb_attach", model);
+      // }
       ctx.status = 200;
       if (result != null) {
         return SUCCESS("新增成功！", result);

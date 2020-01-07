@@ -10,6 +10,9 @@ const {
   LIST_ODD
 } = require("../util/result");
 const uuid = require("uuid/v4");
+const fs = require("mz/fs");
+const path = require("path");
+const pump = require("mz-modules/pump");
 
 /**
  * NewsService
@@ -25,20 +28,14 @@ class NewsService extends Service {
    * @returns
    * @memberof NewsService
    */
-  async create(item, files) {
+  async create(item) {
     const { ctx } = this;
-
     try {
       // 设置接口状态
       ctx.status = 200;
-      let id = uuid();
-
-    //   for (const file of files) {
-    //     attach.create(id, file);
-    //   }
       item.id = uuid();
-      item.createtime = new Date().getTime();
-      item.updatetime = new Date().getTime();
+      item.createtime = new Date();
+      item.updatetime = new Date();
       let result = await ctx.app.mysql.insert("tb_news", item);
       if (result != null) {
         return SUCCESS("新增成功！", result);
@@ -58,12 +55,13 @@ class NewsService extends Service {
    * @returns
    * @memberof NewsService
    */
-  async update(body) {
+  async update({ id, body }) {
     const { ctx } = this;
     try {
       let result = await this.find(id);
       if (result.code == 0) {
-        body.updatetime = new Date().getTime();
+        body.updatetime = new Date();
+        body.id = id;
         result = await ctx.app.mysql.update("tb_news", body);
         ctx.status = 200;
         if (result != null) {

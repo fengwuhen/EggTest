@@ -11,8 +11,7 @@ class NewsController extends Controller {
   async create() {
     const { ctx } = this;
     const body = ctx.request.body;
-    const files = ctx.request.files;
-    ctx.body = await ctx.service.news.create(body, files);
+    ctx.body = await ctx.service.news.create(body);
   }
 
   /**
@@ -59,7 +58,6 @@ class NewsController extends Controller {
    */
   async list() {
     const { ctx } = this;
-    console.log(ctx.params);
     const offset = ctx.params.offset;
     const limit = ctx.params.limit;
     const name = ctx.query.name;
