@@ -10,9 +10,9 @@ const {
   LIST_ODD
 } = require("../util/result");
 const uuid = require("uuid/v4");
-const fs = require('mz/fs');
-const path = require('path');
-const pump = require('mz-modules/pump');
+const fs = require("mz/fs");
+const path = require("path");
+const pump = require("mz-modules/pump");
 
 class AttachService extends Service {
   /**
@@ -25,34 +25,34 @@ class AttachService extends Service {
   async create(linkId, file) {
     const { ctx } = this;
     try {
-      // for (const file of files) {
-      //   let model = {};
-      //   let filename = file.filename;
-      //   let fileId = uuid();
-      //   model.id = fileId;
-      //   model.linkId = id;
-      //   model.name = filename;
-      //   model.createtime = new Date();
-      //   let index1 = filename.lastIndexOf(".");
-      //   let index2 = filename.length;
-      //   let suffix = filename.substring(index1, index2);
-      //   model.suffix = suffix;
-      //   let filePath = "/public/images/" + fileId + suffix;
-      //   const targetPath = path.join(this.config.baseDir, "app", filePath);
-      //   const source = fs.createReadStream(file.filepath);
-      //   const target = fs.createWriteStream(targetPath);
-      //   await pump(source, target);
-      //   model.path = filePath;
-      //   await ctx.app.mysql.insert("tb_attach", model);
-      // }
+        let model = {};
+        let filename = file.filename;
+        let fileId = uuid();
+        model.id = fileId;
+        model.linkId = linkId;
+        model.name = filename;
+        model.createtime = new Date();
+        let start = filename.lastIndexOf(".");
+        let end = filename.length;
+        let suffix = filename.substring(start, end);
+        model.suffix = suffix;
+        let filePath = "/public/images/" + fileId + suffix;
+        const targetPath = path.join(this.config.baseDir, "app", filePath);
+        const source = fs.createReadStream(file.filepath);
+        const target = fs.createWriteStream(targetPath);
+        await pump(source, target);
+        model.path = filePath;
+       let result = await ctx.app.mysql.insert("tb_attach", model);
+      
       ctx.status = 200;
       if (result != null) {
-        return SUCCESS("新增成功！", result);
+        return SUCCESS("新增成功！", model);
       } else {
         return ERROR("新增失败！", {});
       }
     } catch (error) {
       ctx.status = 500;
+      console.log(error);
       return ODD(error.sqlMessage);
     }
   }

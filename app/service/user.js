@@ -86,11 +86,11 @@ class UserService extends Service {
    * @returns
    * @memberof UserService
    */
-  async update({ id, body }) {
+  async update(body) {
     const { ctx } = this;
     try {
-      let result = await this.find(id);
-      let accountOld = result.data.Account;
+      let result = await this.find(body.id);
+      let accountOld = result.data.account;
       let accountNew = body.account;
       if (result.code == 0) {
         if (accountNew != accountOld) {
@@ -99,7 +99,6 @@ class UserService extends Service {
             return ERROR(`${accountNew}账号已经存在！`);
           }
         }
-        body.id = id;
         result = await ctx.app.mysql.update("tb_users", body);
         ctx.status = 200;
         if (result != null) {
@@ -147,6 +146,34 @@ class UserService extends Service {
   }
 
   /**
+   *
+   *
+   * @param {*} body
+   * @returns
+   * @memberof UserService
+   */
+  async destroyMore(body) {
+    const { ctx } = this;
+    try {
+      let ids = `'${body.ids.replace(",", "','")}'`;
+      if (ids != "") {
+        let result = await ctx.app.mysql.query(
+          `delete from tb_users where id in (${ids})`
+        );
+        ctx.status = 200;
+        if (result != null) {
+          return SUCCESS("删除成功！", result);
+        } else {
+          return ERROR("删除失败！", {});
+        }
+      }
+    } catch (error) {
+      ctx.status = 500;
+      return ODD(error);
+    }
+  }
+
+  /**
    * find
    *
    * @param {*} id
@@ -159,7 +186,6 @@ class UserService extends Service {
       let result = await ctx.app.mysql.get("tb_users", {
         id: id
       });
-      console.log(result);
       ctx.status = 200;
       if (result != null) {
         return SUCCESS("查询成功！", result);
@@ -208,8 +234,8 @@ class UserService extends Service {
   async list({ offset, limit, name }) {
     const { ctx } = this;
     try {
-      let start = limit * offset;
-      let end = (limit + 1) * offset;
+      let start = (limit - 1) * offset;
+      let end = limit * offset;
 
       let sql = `select count(1) as total from tb_users `;
       if (name != null && name != "") {

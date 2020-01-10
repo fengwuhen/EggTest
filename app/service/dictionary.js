@@ -1,6 +1,15 @@
 "use strict";
 
 const Service = require("egg").Service;
+const {
+  ERROR,
+  SUCCESS,
+  ODD,
+  LIST_ERROR,
+  LIST_SUCCESS,
+  LIST_ODD
+} = require("../util/result");
+const uuid = require("uuid/v4");
 
 class DictionaryService extends Service {
   /**
@@ -13,19 +22,19 @@ class DictionaryService extends Service {
   async create(item) {
     const { ctx } = this;
     try {
-      item.id = uuid();
-      {
-        item.createtime = new Date().getTime();
-      }
-      let result = await ctx.app.mysql.insert("tb_dictionary", item);
+      // 设置接口状态
       ctx.status = 200;
+      item.id = uuid();
+      item.createtime = new Date();
+      let result = await ctx.app.mysql.insert("tb_dictionary", item);
       if (result != null) {
-        return SUCCESS(result);
+        return SUCCESS("新增成功！", result);
       } else {
-        return ERROR(result);
+        return ERROR("新增失败！", result);
       }
     } catch (error) {
       ctx.status = 500;
+      console.log(error);
       return ODD(error.sqlMessage);
     }
   }
@@ -33,28 +42,52 @@ class DictionaryService extends Service {
   /**
    * update
    *
-   * @param {*} {
-   *         id,
-   *         item
-   *     }
+   * @param {*} body
    * @returns
    * @memberof DictionaryService
    */
-  async update({ id, body }) {
+  async update(body) {
     const { ctx } = this;
     try {
-      let result = await this.find(id);
+      let result = await this.find(body.id);
       if (result.code == 0) {
-        body.id = id;
-        let result = await ctx.app.mysql.update("tb_dictionary", body);
+        result = await ctx.app.mysql.update("tb_dictionary", body);
         ctx.status = 200;
         if (result != null) {
-          return SUCCESS(result);
+          return SUCCESS("更新成功！", result);
         } else {
-          return ERROR(result);
+          return ERROR("更新失败！", {});
         }
       } else {
-        return ERROR("数据不存在！");
+        return ERROR("数据已不存在！", {});
+      }
+    } catch (error) {
+      ctx.status = 500;
+      return ODD(error);
+    }
+  }
+
+  /**
+   *
+   *
+   * @param {*} body
+   * @returns
+   * @memberof DictionaryService
+   */
+  async destroyMore(body) {
+    const { ctx } = this;
+    try {
+      let ids = `'${body.ids.replace(",", "','")}'`;
+      if (ids != "") {
+        let result = await ctx.app.mysql.query(
+          `delete from tb_dictionary where id in (${ids})`
+        );
+        ctx.status = 200;
+        if (result != null) {
+          return SUCCESS("删除成功！", result);
+        } else {
+          return ERROR("删除失败！", {});
+        }
       }
     } catch (error) {
       ctx.status = 500;
@@ -79,12 +112,12 @@ class DictionaryService extends Service {
         });
         ctx.status = 200;
         if (result != null) {
-          return SUCCESS(result);
+          return SUCCESS("删除成功！", result);
         } else {
-          return ERROR(result);
+          return ERROR("删除失败！", {});
         }
       } else {
-        return ERROR("数据不存在！");
+        return ERROR("数据已不存在！", {});
       }
     } catch (error) {
       ctx.status = 500;
@@ -107,48 +140,94 @@ class DictionaryService extends Service {
       });
       ctx.status = 200;
       if (result != null) {
-        return SUCCESS(result);
+        return SUCCESS("查询成功！", result);
       } else {
-        return ERROR(result);
+        return ERROR("查询失败！", {});
       }
     } catch (error) {
       ctx.status = 500;
-      return ODD(error.sqlMessage);
+      return ODD(error.sqlMessage, {});
     }
   }
 
   /**
-   * list
+   * 列表
    *
-   * @param {*} {
-   *         offset,
-   *         limit
-   *     }
+   * @param {*} { name }
    * @returns
    * @memberof DictionaryService
    */
-  async list({ offset, limit }) {
+  async lazy({ name, parentid }) {
+    const { ctx } = this;
+    try {
+      let sql = `select * from tb_dictionary where parentid = '${parentid}' `;
+      if (name != null && name != "") {
+        sql += ` and name like '%${name}%' `;
+      }
+      sql += ` order by createtime desc `;
+      let list = await ctx.app.mysql.query(sql);
+      ctx.status = 200;
+      if (list != null) {
+        // if (parentid == "0") {
+        //   return LIST_SUCCESS("查询成功！", [
+        //     {
+        //       id: 0,
+        //       name: "字典管理",
+        //       leaf: list.length > 0,
+        //       children: list
+        //     }
+        //   ]);
+        // }
+        return LIST_SUCCESS("查询成功！", list);
+      } else {
+        return LIST_ERROR("查询失败！", {});
+      }
+    } catch (error) {
+      ctx.status = 500;
+      return LIST_ODD(error);
+    }
+  }
+
+  /**
+   * 列表
+   *
+   * @param {*} { offset, limit, name }
+   * @returns
+   * @memberof DictionaryService
+   */
+  async list({ offset, limit, name, parentid }) {
     const { ctx } = this;
     try {
       let start = (limit - 1) * offset;
-      let sql = `select count(1) as total from tb_dictionary`;
+      let end = limit * offset;
+
+      let sql = `select count(1) as total from tb_dictionary where parentid = '${parentid}' `;
+      if (name != null && name != "") {
+        sql += ` and name like '%${name}%' `;
+      }
       let total = 0;
       let result = await ctx.app.mysql.query(sql);
       if (result != null) {
         total = result[0].total;
       }
-      sql = `select * from tb_dictionary limit ${start},${offset}`;
-      result = await ctx.app.mysql.query(sql);
+      sql = `select * from tb_dictionary where parentid = '${parentid}' `;
+      if (name != null && name != "") {
+        sql += ` and name like '%${name}%' `;
+      }
+      sql += ` order by createtime desc limit ${start},${end} `;
+      let list = await ctx.app.mysql.query(sql);
       ctx.status = 200;
-      if (result != null) {
-        return LIST_SUCCESS({
-          offset,
-          limit,
+      if (list != null) {
+        return LIST_SUCCESS("查询成功！", {
+          offset: Number(offset),
+          limit: Number(limit),
           total,
-          result
+          size: list.length,
+          over: limit * offset + list.length == total,
+          list
         });
       } else {
-        return LIST_ERROR(result);
+        return LIST_ERROR("查询失败！", {});
       }
     } catch (error) {
       ctx.status = 500;

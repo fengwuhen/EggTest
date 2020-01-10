@@ -34,12 +34,8 @@ class UserController extends Controller {
    */
   async update() {
     const { ctx } = this;
-    const id = ctx.params.id;
     const body = ctx.request.body;
-    ctx.body = await ctx.service.user.update({
-      id,
-      body
-    });
+    ctx.body = await ctx.service.user.update(body);
   }
 
   /**
@@ -51,6 +47,13 @@ class UserController extends Controller {
     const { ctx } = this;
     const id = ctx.params.id;
     ctx.body = await ctx.service.user.destroy(id);
+  }
+
+
+  async destroyMore(){
+    const { ctx } = this;
+    const body = ctx.request.body;
+    ctx.body = await ctx.service.user.destroyMore(body);
   }
 
   /**

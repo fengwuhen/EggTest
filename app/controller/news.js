@@ -11,6 +11,7 @@ class NewsController extends Controller {
   async create() {
     const { ctx } = this;
     const body = ctx.request.body;
+    console.log(body);
     ctx.body = await ctx.service.news.create(body);
   }
 
@@ -21,12 +22,8 @@ class NewsController extends Controller {
    */
   async update() {
     const { ctx } = this;
-    const id = ctx.params.id;
     const body = ctx.request.body;
-    ctx.body = await ctx.service.news.update({
-      id,
-      body
-    });
+    ctx.body = await ctx.service.news.update(body);
   }
 
   /**
@@ -39,6 +36,14 @@ class NewsController extends Controller {
     const id = ctx.params.id;
     ctx.body = await ctx.service.news.destroy(id);
   }
+
+  async destroyMore(){
+    const { ctx } = this;
+    const body = ctx.request.body;
+    console.log(body);
+    ctx.body = await ctx.service.news.destroyMore(body);
+  }
+
 
   /**
    * 查询数据

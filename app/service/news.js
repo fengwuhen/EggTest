@@ -10,9 +10,6 @@ const {
   LIST_ODD
 } = require("../util/result");
 const uuid = require("uuid/v4");
-const fs = require("mz/fs");
-const path = require("path");
-const pump = require("mz-modules/pump");
 
 /**
  * NewsService
@@ -44,6 +41,7 @@ class NewsService extends Service {
       }
     } catch (error) {
       ctx.status = 500;
+      console.log(error);
       return ODD(error.sqlMessage);
     }
   }
@@ -55,13 +53,12 @@ class NewsService extends Service {
    * @returns
    * @memberof NewsService
    */
-  async update({ id, body }) {
+  async update(body) {
     const { ctx } = this;
     try {
-      let result = await this.find(id);
+      let result = await this.find(body.id);
       if (result.code == 0) {
         body.updatetime = new Date();
-        body.id = id;
         result = await ctx.app.mysql.update("tb_news", body);
         ctx.status = 200;
         if (result != null) {
@@ -71,6 +68,34 @@ class NewsService extends Service {
         }
       } else {
         return ERROR("数据已不存在！", {});
+      }
+    } catch (error) {
+      ctx.status = 500;
+      return ODD(error);
+    }
+  }
+
+  /**
+   *
+   *
+   * @param {*} body
+   * @returns
+   * @memberof NewsService
+   */
+  async destroyMore(body) {
+    const { ctx } = this;
+    try {
+      let ids = `'${body.ids.replace(",", "','")}'`;
+      if (ids != "") {
+        let result = await ctx.app.mysql.query(
+          `delete from tb_news where id in (${ids})`
+        );
+        ctx.status = 200;
+        if (result != null) {
+          return SUCCESS("删除成功！", result);
+        } else {
+          return ERROR("删除失败！", {});
+        }
       }
     } catch (error) {
       ctx.status = 500;
@@ -143,8 +168,8 @@ class NewsService extends Service {
   async list({ offset, limit, name }) {
     const { ctx } = this;
     try {
-      let start = limit * offset;
-      let end = (limit + 1) * offset;
+      let start = (limit - 1) * offset;
+      let end = limit * offset;
 
       let sql = `select count(1) as total from tb_news `;
       if (name != null && name != "") {
