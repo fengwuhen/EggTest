@@ -48,7 +48,6 @@ class AttachController extends Controller {
    */
   async find() {
     const { ctx } = this;
-    console.log(ctx.params);
     const id = ctx.params.id;
     ctx.body = await ctx.service.attach.find(id);
   }
@@ -60,7 +59,6 @@ class AttachController extends Controller {
    */
   async list() {
     const { ctx } = this;
-    console.log(ctx.params);
     const offset = ctx.params.offset;
     const limit = ctx.params.limit;
     ctx.body = await ctx.service.attach.list({

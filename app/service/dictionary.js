@@ -35,7 +35,6 @@ class DictionaryService extends Service {
       }
     } catch (error) {
       ctx.status = 500;
-      console.log(error);
       return ODD(error.sqlMessage);
     }
   }
@@ -79,7 +78,6 @@ class DictionaryService extends Service {
     const { ctx } = this;
     try {
       let ids = `'${body.ids.replaceAll(",", "','")}'`;
-      console.log(ids);
       if (ids != "") {
         let result = await ctx.app.mysql.query(
           `delete from tb_dictionary where id in (${ids})`

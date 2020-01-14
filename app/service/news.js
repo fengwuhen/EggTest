@@ -41,7 +41,6 @@ class NewsService extends Service {
       }
     } catch (error) {
       ctx.status = 500;
-      console.log(error);
       return ODD(error.sqlMessage);
     }
   }
