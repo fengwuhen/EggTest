@@ -23,6 +23,7 @@ module.exports = app => {
   router.get("/dict/find/:id", controller.dictionary.find);
   router.get("/dict/list/:offset/:limit", controller.dictionary.list);
   router.get("/dict/lazy",controller.dictionary.lazy);
+  router.get("/dict/listByCode/:code",controller.dictionary.listByCode);
 
   // 用户相关路由配置
   router.post("/user/login", controller.user.login);

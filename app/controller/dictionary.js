@@ -11,7 +11,6 @@ class DictionaryController extends Controller {
   async create() {
     const { ctx } = this;
     const body = ctx.request.body;
-    console.log(body);
     ctx.body = await ctx.service.dictionary.create(body);
   }
 
@@ -40,7 +39,6 @@ class DictionaryController extends Controller {
   async destroyMore() {
     const { ctx } = this;
     const body = ctx.request.body;
-    console.log(body);
     ctx.body = await ctx.service.dictionary.destroyMore(body);
   }
 
@@ -58,11 +56,12 @@ class DictionaryController extends Controller {
   async lazy() {
     const { ctx } = this;
     const name = ctx.query.name;
+    const type = ctx.query.type;
     const parentid = ctx.query.parentid;
-    console.log(ctx.query);
     ctx.body = await ctx.service.dictionary.lazy({
       name,
-      parentid
+      parentid,
+      type
     });
   }
 
@@ -83,6 +82,12 @@ class DictionaryController extends Controller {
       name,
       parentid
     });
+  }
+
+  async listByCode(){
+    const { ctx } = this;
+    const code = ctx.params.code;
+    ctx.body = await ctx.service.dictionary.listByCode(code);
   }
 }
 

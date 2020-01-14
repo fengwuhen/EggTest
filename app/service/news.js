@@ -85,7 +85,7 @@ class NewsService extends Service {
   async destroyMore(body) {
     const { ctx } = this;
     try {
-      let ids = `'${body.ids.replace(",", "','")}'`;
+      let ids = `'${body.ids.replaceAll(",", "','")}'`;
       if (ids != "") {
         let result = await ctx.app.mysql.query(
           `delete from tb_news where id in (${ids})`

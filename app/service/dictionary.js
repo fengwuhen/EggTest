@@ -10,6 +10,7 @@ const {
   LIST_ODD
 } = require("../util/result");
 const uuid = require("uuid/v4");
+require("../util/global");
 
 class DictionaryService extends Service {
   /**
@@ -77,7 +78,8 @@ class DictionaryService extends Service {
   async destroyMore(body) {
     const { ctx } = this;
     try {
-      let ids = `'${body.ids.replace(",", "','")}'`;
+      let ids = `'${body.ids.replaceAll(",", "','")}'`;
+      console.log(ids);
       if (ids != "") {
         let result = await ctx.app.mysql.query(
           `delete from tb_dictionary where id in (${ids})`
@@ -157,10 +159,10 @@ class DictionaryService extends Service {
    * @returns
    * @memberof DictionaryService
    */
-  async lazy({ name, parentid }) {
+  async lazy({ name, parentid, type }) {
     const { ctx } = this;
     try {
-      let sql = `select * from tb_dictionary where parentid = '${parentid}' `;
+      let sql = `select * from tb_dictionary where type='${type}' and  parentid = '${parentid}' `;
       if (name != null && name != "") {
         sql += ` and name like '%${name}%' `;
       }
@@ -226,6 +228,31 @@ class DictionaryService extends Service {
           over: limit * offset + list.length == total,
           list
         });
+      } else {
+        return LIST_ERROR("查询失败！", {});
+      }
+    } catch (error) {
+      ctx.status = 500;
+      return LIST_ODD(error);
+    }
+  }
+
+  /**
+   * 列表
+   *
+   * @param {*} { code }
+   * @returns
+   * @memberof DictionaryService
+   */
+  async listByCode(code) {
+    const { ctx } = this;
+    try {
+      let sql = `select id,name from tb_dictionary where parentid = ( select id from tb_dictionary where code='${code}' limit 0,1 ) `;
+      sql += ` order by createtime desc `;
+      let list = await ctx.app.mysql.query(sql);
+      ctx.status = 200;
+      if (list != null) {
+        return LIST_SUCCESS("查询成功！", list);
       } else {
         return LIST_ERROR("查询失败！", {});
       }

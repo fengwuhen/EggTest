@@ -75,7 +75,6 @@ class UserController extends Controller {
   async findByAccount() {
     const { ctx } = this;
     const account = ctx.params.account;
-    console.log(account);
     ctx.body = await ctx.service.user.findByAccount(account);
   }
 

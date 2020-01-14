@@ -11,7 +11,6 @@ class NewsController extends Controller {
   async create() {
     const { ctx } = this;
     const body = ctx.request.body;
-    console.log(body);
     ctx.body = await ctx.service.news.create(body);
   }
 
@@ -40,7 +39,6 @@ class NewsController extends Controller {
   async destroyMore(){
     const { ctx } = this;
     const body = ctx.request.body;
-    console.log(body);
     ctx.body = await ctx.service.news.destroyMore(body);
   }
 
